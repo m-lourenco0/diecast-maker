@@ -1,0 +1,156 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Space Grotesk", "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+
+  --color-ink: #0b0c0e;
+  --color-ink-2: #101216;
+  --color-panel: #13151a;
+  --color-panel-2: #171a20;
+  --color-line: rgba(255, 255, 255, 0.08);
+  --color-line-strong: rgba(255, 255, 255, 0.14);
+  --color-mist: #9aa1ab;
+  --color-mist-2: #6c737d;
+  --color-gold: #c8a96a;
+  --color-gold-soft: #d9c294;
+  --color-gold-deep: #8a7448;
+
+  --shadow-panel: 0 24px 60px -20px rgba(0, 0, 0, 0.75), 0 2px 0 0 rgba(255, 255, 255, 0.04) inset;
+  --shadow-float: 0 18px 50px -12px rgba(0, 0, 0, 0.8);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-ink);
+  color: #f4f5f6;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+::selection {
+  background: rgba(200, 169, 106, 0.35);
+}
+
+/* ---------- viewport backdrop ---------- */
+
+.viewport-backdrop {
+  background:
+    radial-gradient(130% 100% at 50% -10%, #23272e 0%, #12141a 42%, #0a0b0d 78%, #08090a 100%);
+}
+
+.viewport-floor-glow {
+  background:
+    radial-gradient(55% 34% at 50% 79%, rgba(200, 169, 106, 0.14) 0%, rgba(200, 169, 106, 0.05) 42%, transparent 72%);
+}
+
+.viewport-vignette {
+  box-shadow: inset 0 0 240px 40px rgba(0, 0, 0, 0.62);
+}
+
+/* ---------- glass surfaces ---------- */
+
+.glass-panel {
+  background: linear-gradient(180deg, rgba(24, 27, 33, 0.86) 0%, rgba(15, 17, 21, 0.92) 100%);
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  border: 1px solid var(--color-line);
+  box-shadow: var(--shadow-panel);
+}
+
+.glass-chip {
+  background: rgba(18, 20, 25, 0.72);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid var(--color-line);
+}
+
+/* ---------- scrollbars ---------- */
+
+.scroll-slim {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+}
+
+.scroll-slim::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scroll-slim::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scroll-slim::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+}
+
+.scroll-slim::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+/* ---------- swatch finishes ---------- */
+
+.swatch-gloss {
+  background-image: radial-gradient(120% 90% at 28% 22%, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.08) 34%, transparent 55%);
+}
+
+.swatch-metallic {
+  background-image:
+    radial-gradient(120% 90% at 28% 22%, rgba(255, 255, 255, 0.62) 0%, rgba(255, 255, 255, 0.1) 36%, transparent 58%),
+    repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.1) 0 1px, rgba(0, 0, 0, 0.08) 1px 3px);
+}
+
+.swatch-matte {
+  background-image:
+    radial-gradient(120% 90% at 30% 24%, rgba(255, 255, 255, 0.24) 0%, rgba(255, 255, 255, 0.05) 40%, transparent 60%);
+}
+
+.swatch-satin {
+  background-image:
+    radial-gradient(120% 90% at 30% 24%, rgba(255, 255, 255, 0.38) 0%, rgba(255, 255, 255, 0.08) 40%, transparent 60%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.05) 0 2px, transparent 2px 4px);
+}
+
+.swatch-chrome {
+  background-image:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.95) 0%, rgba(180, 195, 210, 0.85) 22%, rgba(70, 82, 95, 0.9) 38%, rgba(240, 246, 252, 0.95) 52%, rgba(120, 132, 146, 0.9) 68%, rgba(255, 255, 255, 0.92) 84%, rgba(140, 152, 165, 0.9) 100%);
+}
+
+.swatch-plaid {
+  background-image:
+    repeating-linear-gradient(90deg, rgba(210, 60, 60, 0.85) 0 6px, transparent 6px 12px, rgba(255, 255, 255, 0.85) 12px 14px, transparent 14px 26px, rgba(60, 80, 180, 0.8) 26px 32px, transparent 32px 40px),
+    repeating-linear-gradient(0deg, rgba(210, 60, 60, 0.85) 0 6px, transparent 6px 12px, rgba(255, 255, 255, 0.85) 12px 14px, transparent 14px 26px, rgba(60, 80, 180, 0.8) 26px 32px, transparent 32px 40px);
+  background-color: #17181c;
+}
+
+/* ---------- misc ---------- */
+
+.text-balance {
+  text-wrap: balance;
+}
+
+.no-drag {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer-line {
+  background: linear-gradient(90deg, transparent 0%, rgba(200, 169, 106, 0.9) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2.4s ease-in-out infinite;
+}

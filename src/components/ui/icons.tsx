@@ -171,3 +171,39 @@ export const IconTop = (p: IconProps) => (
     <path d="M8 7h5.5L16 11.5l-2.5 6H8l-2.5-6L8 7Z" />
   </svg>
 )
+
+export const IconKeyboard = (p: IconProps) => (
+  <svg {...base(p)}>
+    <rect x="2.8" y="6.5" width="18.4" height="11" rx="2" />
+    <path d="M6.2 10h.01M9.4 10h.01M12.6 10h.01M15.8 10h.01M18.2 10h.01M6.2 13.2h.01M18.2 13.2h.01M8.4 16h7.2" />
+  </svg>
+)
+
+export const IconUndo = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M4.5 8.5h9.2a5 5 0 0 1 0 10H8" />
+    <path d="M4.5 8.5 8.2 5M4.5 8.5 8.2 12" />
+  </svg>
+)
+
+export const IconBookmark = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M6.5 3.5h11v17l-5.5-3.8-5.5 3.8v-17Z" />
+  </svg>
+)
+
+export const IconTrash = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M4.5 6.5h15M9.5 6V4.2c0-.4.3-.7.7-.7h3.6c.4 0 .7.3.7.7V6" />
+    <path d="m6.5 6.5.9 13.1c0 .5.4.9.9.9h7.4c.5 0 .9-.4.9-.9l.9-13.1" />
+    <path d="M10 10.5v6M14 10.5v6" />
+  </svg>
+)
+
+export const IconFocus = (p: IconProps) => (
+  <svg {...base(p)}>
+    <circle cx="12" cy="12" r="3.2" />
+    <path d="M3.5 8.5v-3c0-1.1.9-2 2-2h3M15.5 3.5h3c1.1 0 2 .9 2 2v3M20.5 15.5v3c0 1.1-.9 2-2 2h-3M8.5 20.5h-3c-1.1 0-2-.9-2-2v-3" />
+  </svg>
+)
+

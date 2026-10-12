@@ -2,8 +2,9 @@ import { createContext, useContext, useMemo, type ReactNode } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { byId } from '../../data/catalog'
+import { softwareRenderer } from '../../lib/perf'
 import { getPlaidTexture } from '../../lib/plaid'
-import { useConfigurator } from '../../store/configurator'
+import { getEffectiveConfig } from '../../store/configurator'
 import type { FinishId } from '../../types'
 
 interface FinishTargets {
@@ -14,7 +15,25 @@ interface FinishTargets {
   envMapIntensity: number
 }
 
+/** Lite sessions compile the paint without the clearcoat lobe (much cheaper). */
+const LITE = softwareRenderer
+
 export function finishTargets(finish: FinishId): FinishTargets {
+  if (LITE) {
+    switch (finish) {
+      case 'metallic':
+        return { metalness: 0.75, roughness: 0.28, clearcoat: 0, clearcoatRoughness: 1, envMapIntensity: 1.2 }
+      case 'satin':
+        return { metalness: 0.32, roughness: 0.5, clearcoat: 0, clearcoatRoughness: 1, envMapIntensity: 0.85 }
+      case 'matte':
+        return { metalness: 0.05, roughness: 0.85, clearcoat: 0, clearcoatRoughness: 1, envMapIntensity: 0.45 }
+      case 'chrome':
+        return { metalness: 1, roughness: 0.07, clearcoat: 0, clearcoatRoughness: 1, envMapIntensity: 1.3 }
+      case 'gloss':
+      default:
+        return { metalness: 0.12, roughness: 0.13, clearcoat: 0, clearcoatRoughness: 1, envMapIntensity: 0.95 }
+    }
+  }
   switch (finish) {
     case 'metallic':
       return { metalness: 0.75, roughness: 0.28, clearcoat: 1, clearcoatRoughness: 0.12, envMapIntensity: 1.4 }
@@ -57,15 +76,15 @@ export function useMaterials(): MaterialsApi {
 
 export function MaterialsProvider({ children }: { children: ReactNode }) {
   const materials = useMemo<MaterialsApi>(() => {
-    const paint = new THREE.MeshPhysicalMaterial({ color: '#c7ccd1', clearcoat: 1, clearcoatRoughness: 0.06 })
+    const paint = new THREE.MeshPhysicalMaterial({ color: '#c7ccd1', clearcoat: LITE ? 0 : 1, clearcoatRoughness: LITE ? 1 : 0.06 })
     const glass = new THREE.MeshPhysicalMaterial({
       color: '#aab6bf',
       transparent: true,
       opacity: 0.5,
       roughness: 0.03,
       metalness: 0,
-      clearcoat: 1,
-      clearcoatRoughness: 0.05,
+      clearcoat: LITE ? 0 : 1,
+      clearcoatRoughness: LITE ? 1 : 0.05,
       envMapIntensity: 1.8,
       depthWrite: false,
     })
@@ -77,7 +96,7 @@ export function MaterialsProvider({ children }: { children: ReactNode }) {
     const plaid = new THREE.MeshStandardMaterial({ map: getPlaidTexture(), color: '#ffffff', roughness: 0.68, metalness: 0 })
     const darkTrim = new THREE.MeshStandardMaterial({ color: '#141519', metalness: 0.25, roughness: 0.5 })
     const carbon = new THREE.MeshStandardMaterial({ color: '#1b1d21', metalness: 0.45, roughness: 0.38 })
-    const chrome = new THREE.MeshPhysicalMaterial({ color: '#dde3e8', metalness: 1, roughness: 0.08, clearcoat: 1, clearcoatRoughness: 0.04, envMapIntensity: 1.4 })
+    const chrome = new THREE.MeshPhysicalMaterial({ color: '#dde3e8', metalness: 1, roughness: 0.08, clearcoat: LITE ? 0 : 1, clearcoatRoughness: LITE ? 1 : 0.04, envMapIntensity: 1.4 })
     const tire = new THREE.MeshStandardMaterial({ color: '#17181b', metalness: 0, roughness: 0.92 })
     const headlight = new THREE.MeshStandardMaterial({ color: '#e9e6da', emissive: '#fff3d0', emissiveIntensity: 0.55, metalness: 0.4, roughness: 0.18 })
     const taillight = new THREE.MeshStandardMaterial({ color: '#3a0d0c', emissive: '#ff2d1f', emissiveIntensity: 6, metalness: 0.15, roughness: 0.45 })
@@ -89,7 +108,7 @@ export function MaterialsProvider({ children }: { children: ReactNode }) {
   useFrame((_, delta) => {
     const dt = Math.min(delta, 1 / 30)
     const k = 1 - Math.exp(-8 * dt)
-    const { config } = useConfigurator.getState()
+    const config = getEffectiveConfig()
 
     const paint = byId.paint(config.paintId)
     const finish = finishTargets(paint.finish)

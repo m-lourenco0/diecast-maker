@@ -1,18 +1,21 @@
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { CAR_DIMS } from '../../data/profiles'
 import { byId } from '../../data/catalog'
+import { VIEW_ORDER } from '../../lib/views'
 import { useConfigurator } from '../../store/configurator'
 import type { ViewId } from '../../types'
-import { IconCar, IconCockpit, IconFront, IconProfile, IconRear, IconRotate, IconTop } from './icons'
+import { IconCar, IconCockpit, IconFront, IconKeyboard, IconProfile, IconRear, IconRotate, IconTop } from './icons'
 
-const VIEWS: { id: ViewId; label: string; Icon: typeof IconCar }[] = [
-  { id: 'front', label: 'Front', Icon: IconFront },
-  { id: 'three-quarter', label: '3/4', Icon: IconCar },
-  { id: 'profile', label: 'Profile', Icon: IconProfile },
-  { id: 'rear', label: 'Rear', Icon: IconRear },
-  { id: 'top', label: 'Top', Icon: IconTop },
-  { id: 'cockpit', label: 'Cockpit', Icon: IconCockpit },
-]
+const VIEW_META: Record<ViewId, { label: string; Icon: typeof IconCar }> = {
+  front: { label: 'Front', Icon: IconFront },
+  'three-quarter': { label: '3/4', Icon: IconCar },
+  profile: { label: 'Profile', Icon: IconProfile },
+  rear: { label: 'Rear', Icon: IconRear },
+  top: { label: 'Top', Icon: IconTop },
+  cockpit: { label: 'Cockpit', Icon: IconCockpit },
+}
+
+const VIEWS = VIEW_ORDER.map((id) => ({ id, ...VIEW_META[id] }))
 
 export function TopBar() {
   const modelId = useConfigurator((s) => s.config.modelId)
@@ -20,6 +23,8 @@ export function TopBar() {
   const turntable = useConfigurator((s) => s.turntable)
   const setView = useConfigurator((s) => s.setView)
   const setTurntable = useConfigurator((s) => s.setTurntable)
+  const toggleShortcuts = useConfigurator((s) => s.toggleShortcuts)
+  const reduceMotion = useReducedMotion()
   const model = byId.model(modelId)
   const dims = CAR_DIMS[modelId]
 
@@ -49,15 +54,17 @@ export function TopBar() {
         </div>
 
         <div className="pointer-events-auto flex items-center gap-2">
-          <div className="glass-chip hidden items-center gap-1 rounded-full p-1 md:flex">
+          <div className="glass-chip hidden items-center gap-1 rounded-full p-1 md:flex" role="radiogroup" aria-label="Camera views">
             {VIEWS.map(({ id, label, Icon }) => {
               const active = view === id
               return (
                 <button
                   key={id}
                   onClick={() => setView(id)}
-                  title={label}
+                  title={`${label} view (V)`}
                   aria-label={`${label} view`}
+                  aria-checked={active}
+                  role="radio"
                   className={`relative flex h-9 items-center gap-1.5 rounded-full px-3 text-[11px] uppercase tracking-[0.14em] transition-colors ${
                     active ? 'text-ink' : 'text-mist hover:text-white'
                   }`}
@@ -79,21 +86,33 @@ export function TopBar() {
           </div>
           <button
             onClick={() => setTurntable(!turntable)}
-            title="Turntable"
+            title="Turntable (T)"
             aria-label="Toggle turntable"
             aria-pressed={turntable}
             className={`glass-chip flex h-11 items-center gap-2 rounded-xl px-3.5 text-[11px] uppercase tracking-[0.16em] transition-colors ${
               turntable ? 'text-gold' : 'text-mist hover:text-white'
             }`}
           >
-            <IconRotate width={17} height={17} className={turntable ? 'animate-[spin_9s_linear_infinite]' : ''} />
+            <IconRotate
+              width={17}
+              height={17}
+              className={turntable && !reduceMotion ? 'animate-[spin_9s_linear_infinite]' : ''}
+            />
             <span className="hidden md:inline">Turntable</span>
+          </button>
+          <button
+            onClick={toggleShortcuts}
+            title="Keyboard shortcuts (?)"
+            aria-label="Keyboard shortcuts"
+            className="glass-chip hidden h-11 w-11 items-center justify-center rounded-xl text-mist transition-colors hover:text-white md:flex"
+          >
+            <IconKeyboard width={17} height={17} />
           </button>
         </div>
       </div>
 
       <div className="pointer-events-auto flex justify-center md:hidden">
-        <div className="glass-chip flex items-center gap-0.5 rounded-full p-1">
+        <div className="glass-chip flex items-center gap-0.5 rounded-full p-1" role="radiogroup" aria-label="Camera views">
           {VIEWS.map(({ id, label, Icon }) => {
             const active = view === id
             return (
@@ -102,6 +121,8 @@ export function TopBar() {
                 onClick={() => setView(id)}
                 title={label}
                 aria-label={`${label} view`}
+                aria-checked={active}
+                role="radio"
                 className={`relative flex h-9 w-10 items-center justify-center rounded-full transition-colors ${
                   active ? 'text-ink' : 'text-mist'
                 }`}

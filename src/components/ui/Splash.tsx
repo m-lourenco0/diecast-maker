@@ -1,21 +1,45 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
+const INTRO_KEY = 'meridian-intro-played'
+
 export function Splash() {
-  const [visible, setVisible] = useState(true)
+  const [visible, setVisible] = useState(() => {
+    try {
+      return !window.sessionStorage.getItem(INTRO_KEY)
+    } catch {
+      return true
+    }
+  })
 
   useEffect(() => {
-    const t = setTimeout(() => setVisible(false), 1700)
-    return () => clearTimeout(t)
-  }, [])
+    if (!visible) return
+    const dismiss = () => {
+      setVisible(false)
+      try {
+        window.sessionStorage.setItem(INTRO_KEY, '1')
+      } catch {
+        /* ignore */
+      }
+    }
+    const timer = setTimeout(dismiss, 1450)
+    window.addEventListener('keydown', dismiss)
+    window.addEventListener('pointerdown', dismiss)
+    return () => {
+      clearTimeout(timer)
+      window.removeEventListener('keydown', dismiss)
+      window.removeEventListener('pointerdown', dismiss)
+    }
+  }, [visible])
 
   return (
     <AnimatePresence>
       {visible && (
         <motion.div
           key="splash"
+          aria-hidden
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.7, ease: 'easeOut' }}
+          transition={{ duration: 0.35, ease: 'easeOut' }}
           className="absolute inset-0 z-[60] flex flex-col items-center justify-center bg-ink"
         >
           <motion.svg

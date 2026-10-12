@@ -4,7 +4,7 @@ import { useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import { CAR_DIMS, type CarDims } from '../../data/profiles'
 import { GLB_MODELS, type GlbModelDef } from '../../data/models3d'
-import { useConfigurator } from '../../store/configurator'
+import { useConfigurator, useEffectiveConfig } from '../../store/configurator'
 import { ProceduralCar } from './DiecastCar'
 import { useMaterials, type MaterialsApi } from './materials'
 
@@ -32,9 +32,7 @@ const LID_RE = /^(decklid|hood|trunk|bonnet)/
 function GltfCar({ def, dims }: { def: GlbModelDef; dims: CarDims }) {
   const gltf = useGLTF(def.url)
   const mats = useMaterials()
-  const wheelId = useConfigurator((s) => s.config.wheelId)
-  const spoilerId = useConfigurator((s) => s.config.spoilerId)
-  const bodykitId = useConfigurator((s) => s.config.bodykitId)
+  const { wheelId, spoilerId, bodykitId } = useEffectiveConfig()
   const doorsOpen = useConfigurator((s) => s.parts.doors)
   const lidOpen = useConfigurator((s) => s.parts.lid)
   const togglePart = useConfigurator((s) => s.togglePart)

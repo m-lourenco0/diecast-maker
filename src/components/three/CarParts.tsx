@@ -5,7 +5,7 @@ import * as THREE from 'three'
 import type { CarDims } from '../../data/profiles'
 import { byId } from '../../data/catalog'
 import { buildBodyGeometry, buildCabinGeometry, taperFactor, TUMBLE } from '../../lib/carShapes'
-import { useConfigurator } from '../../store/configurator'
+import { useConfigurator, useEffectiveConfig } from '../../store/configurator'
 import { useMaterials } from './materials'
 
 /* ------------------------------------------------------------------ body */
@@ -229,8 +229,7 @@ export function Underbody({ dims }: { dims: CarDims }) {
 /* ----------------------------------------------------------------- wheels */
 
 function Wheel({ dims, axleX, side }: { dims: CarDims; axleX: number; side: 1 | -1 }) {
-  const wheelId = useConfigurator((s) => s.config.wheelId)
-  const bodykitId = useConfigurator((s) => s.config.bodykitId)
+  const { wheelId, bodykitId } = useEffectiveConfig()
   const { rim, rimLip, caliper, tire, chrome, darkTrim } = useMaterials()
 
   const wheel = byId.wheel(wheelId)
@@ -375,7 +374,7 @@ function Seat({ dims, seatX, seatZ, heritage }: { dims: CarDims; seatX: number; 
 }
 
 export function Interior({ dims }: { dims: CarDims }) {
-  const interiorId = useConfigurator((s) => s.config.interiorId)
+  const { interiorId } = useEffectiveConfig()
   const { leather, accent, darkTrim } = useMaterials()
   const heritage = interiorId === 'int-heritage'
 
@@ -611,8 +610,7 @@ export function Lights({ dims }: { dims: CarDims }) {
 /* ------------------------------------------------------------------- aero */
 
 export function Aero({ dims }: { dims: CarDims }) {
-  const bodykitId = useConfigurator((s) => s.config.bodykitId)
-  const spoilerId = useConfigurator((s) => s.config.spoilerId)
+  const { bodykitId, spoilerId } = useEffectiveConfig()
   const { darkTrim, carbon, paint } = useMaterials()
   const rearX = -dims.length / 2
   const archH = archHalfSpan(dims)

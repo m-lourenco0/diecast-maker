@@ -13,10 +13,11 @@ import {
 } from '../../data/catalog'
 import { CAR_DIMS } from '../../data/profiles'
 import { silhouettePath } from '../../lib/carShapes'
+import { MODEL_REVISION } from '../../lib/revision'
 import { usd } from '../../lib/pricing'
-import { useConfigurator } from '../../store/configurator'
-import type { CategoryId, FinishId, ModelId, WheelOption } from '../../types'
-import { IconCheck, IconClose } from './icons'
+import { previewProps, useConfigurator } from '../../store/configurator'
+import type { CategoryId, FinishId, ModelId, ViewId, WheelOption } from '../../types'
+import { IconCheck, IconClose, IconFocus } from './icons'
 
 const DESCRIPTIONS: Record<CategoryId, string> = {
   model: 'Choose the silhouette that starts your build.',
@@ -25,6 +26,16 @@ const DESCRIPTIONS: Record<CategoryId, string> = {
   glazing: 'Tint the glass house to taste.',
   aero: 'Body kits and rear-deck aero.',
   interior: 'Leather, alcantara and heritage inserts.',
+}
+
+/** The camera angle that shows each category off best. */
+const CATEGORY_VIEW: Record<CategoryId, ViewId> = {
+  model: 'three-quarter',
+  paint: 'three-quarter',
+  wheels: 'profile',
+  glazing: 'three-quarter',
+  aero: 'rear',
+  interior: 'cockpit',
 }
 
 const FINISH_CLASS: Record<FinishId, string> = {
@@ -69,6 +80,9 @@ function ModelPanel() {
   const setModel = useConfigurator((s) => s.setModel)
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-3">
+      <motion.p variants={item} className="text-[9px] uppercase tracking-[0.16em] text-mist-2/70">
+        Procedural placeholder · {MODEL_REVISION}
+      </motion.p>
       {MODELS.map((m) => {
         const active = m.id === modelId
         return (
@@ -110,6 +124,7 @@ function ModelPanel() {
 /* ------------------------------------------------------------ paint panel */
 
 function Swatch({
+  id,
   hex,
   finish,
   active,
@@ -119,6 +134,7 @@ function Swatch({
   note,
   size = 'lg',
 }: {
+  id: string
   hex: string
   finish: FinishId | 'glass' | 'plaid'
   active: boolean
@@ -131,7 +147,13 @@ function Swatch({
   const overlay =
     finish === 'glass' || finish === 'plaid' ? '' : FINISH_CLASS[finish]
   return (
-    <motion.button variants={item} onClick={onClick} className="group flex flex-col items-center gap-1.5" aria-pressed={active}>
+    <motion.button
+      variants={item}
+      onClick={onClick}
+      className="group flex flex-col items-center gap-1.5"
+      aria-pressed={active}
+      {...previewProps({ paintId: id })}
+    >
       <span
         className={`relative overflow-hidden rounded-full border border-white/10 transition-transform duration-200 group-hover:scale-[1.07] ${
           size === 'lg' ? 'h-11 w-11' : 'h-9 w-9'
@@ -163,6 +185,7 @@ function PaintPanel() {
       {PAINTS.map((p) => (
         <Swatch
           key={p.id}
+          id={p.id}
           hex={p.hex}
           finish={p.finish}
           active={p.id === paintId}
@@ -250,6 +273,7 @@ function WheelsPanel() {
               className={`flex w-full items-center gap-3.5 rounded-xl border p-3 text-left transition-colors ${
                 active ? 'border-gold/60 bg-gold/[0.07]' : 'border-line bg-white/[0.02] hover:border-line-strong hover:bg-white/[0.04]'
               }`}
+              {...previewProps({ wheelId: w.id })}
             >
               <WheelIcon wheel={w} active={active} />
               <span className="flex-1">
@@ -280,6 +304,7 @@ function WheelsPanel() {
               aria-label={c.name}
               aria-pressed={active}
               className="group flex flex-col items-center gap-1.5"
+              {...previewProps({ caliperId: c.id })}
             >
               <span
                 className={`h-8 w-8 rounded-full border border-white/15 transition-transform group-hover:scale-110 ${
@@ -288,6 +313,9 @@ function WheelsPanel() {
                 style={{ backgroundColor: c.hex }}
               />
               <span className={`text-[8.5px] uppercase tracking-wider ${active ? 'text-gold' : 'text-mist-2'}`}>{c.name}</span>
+              <span className={`text-[8.5px] tabular-nums ${c.price ? 'text-gold-soft' : 'text-mist-2'}`}>
+                {c.price ? `+${usd(c.price)}` : 'Included'}
+              </span>
             </button>
           )
         })}
@@ -314,6 +342,7 @@ function GlazingPanel() {
             className={`flex w-full items-center gap-3.5 rounded-xl border p-3 text-left transition-colors ${
               active ? 'border-gold/60 bg-gold/[0.07]' : 'border-line bg-white/[0.02] hover:border-line-strong hover:bg-white/[0.04]'
             }`}
+            {...previewProps({ tintId: t.id })}
           >
             <span className="relative h-10 w-14 overflow-hidden rounded-lg border border-white/12">
               <span className="absolute inset-0" style={{ backgroundColor: t.hex, opacity: 0.35 + t.opacity * 0.65 }} />
@@ -346,13 +375,14 @@ function RadioCard({
   name,
   blurb,
   price,
+  ...rest
 }: {
   active: boolean
   onClick: () => void
   name: string
   blurb: string
   price: number
-}) {
+} & Omit<React.ComponentProps<typeof motion.button>, 'onClick'>) {
   return (
     <motion.button
       variants={item}
@@ -361,6 +391,7 @@ function RadioCard({
       className={`flex w-full items-center justify-between gap-3 rounded-xl border p-3.5 text-left transition-colors ${
         active ? 'border-gold/60 bg-gold/[0.07]' : 'border-line bg-white/[0.02] hover:border-line-strong hover:bg-white/[0.04]'
       }`}
+      {...rest}
     >
       <span>
         <span className="block text-[12.5px] tracking-wide">{name}</span>
@@ -394,6 +425,7 @@ function AeroPanel() {
             name={k.name}
             blurb={k.blurb}
             price={k.price}
+            {...previewProps({ bodykitId: k.id })}
           />
         ))}
       </div>
@@ -409,6 +441,7 @@ function AeroPanel() {
             name={s.name}
             blurb={s.blurb}
             price={s.price}
+            {...previewProps({ spoilerId: s.id })}
           />
         ))}
       </div>
@@ -434,6 +467,7 @@ function InteriorPanel() {
             className={`flex w-full items-center gap-3.5 rounded-xl border p-3 text-left transition-colors ${
               active ? 'border-gold/60 bg-gold/[0.07]' : 'border-line bg-white/[0.02] hover:border-line-strong hover:bg-white/[0.04]'
             }`}
+            {...previewProps({ interiorId: o.id })}
           >
             <span
               className="h-10 w-10 shrink-0 overflow-hidden rounded-full border border-white/12"
@@ -485,6 +519,7 @@ export function OptionPanel() {
   const category = useConfigurator((s) => s.category)
   const panelOpen = useConfigurator((s) => s.panelOpen)
   const closePanel = useConfigurator((s) => s.closePanel)
+  const setView = useConfigurator((s) => s.setView)
   const meta = CATEGORIES.find((c) => c.id === category)
 
   return (
@@ -492,6 +527,9 @@ export function OptionPanel() {
       {panelOpen && meta && (
         <motion.aside
           key="option-panel"
+          id="option-panel"
+          role="tabpanel"
+          aria-labelledby={`tab-${category}`}
           initial={{ opacity: 0, x: -26 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -26 }}
@@ -502,14 +540,30 @@ export function OptionPanel() {
             <div>
               <h2 className="font-display text-[14px] uppercase tracking-[0.2em]">{meta.label}</h2>
               <p className="mt-1 text-[11px] leading-snug text-mist-2">{DESCRIPTIONS[category]}</p>
+              {category !== 'model' && (
+                <p className="mt-1.5 hidden items-center gap-1.5 text-[9px] uppercase tracking-[0.16em] text-mist-2 md:flex">
+                  <span className="inline-block h-1 w-1 rounded-full bg-gold/80" />
+                  Hover to preview on the model
+                </p>
+              )}
             </div>
-            <button
-              onClick={closePanel}
-              aria-label="Close options"
-              className="mt-0.5 flex h-7 w-7 items-center justify-center rounded-lg border border-line text-mist-2 transition-colors hover:border-line-strong hover:text-white"
-            >
-              <IconClose width={13} height={13} />
-            </button>
+            <div className="flex shrink-0 items-center gap-1.5">
+              <button
+                onClick={() => setView(CATEGORY_VIEW[category])}
+                title="Jump to the best view for this category"
+                aria-label="Jump to the best view for this category"
+                className="flex h-7 w-7 items-center justify-center rounded-lg border border-line text-mist-2 transition-colors hover:border-gold/50 hover:text-gold"
+              >
+                <IconFocus width={13} height={13} />
+              </button>
+              <button
+                onClick={closePanel}
+                aria-label="Close options"
+                className="flex h-7 w-7 items-center justify-center rounded-lg border border-line text-mist-2 transition-colors hover:border-line-strong hover:text-white"
+              >
+                <IconClose width={13} height={13} />
+              </button>
+            </div>
           </header>
           <div className="scroll-slim flex-1 overflow-y-auto px-5 py-4">
             <PanelContent category={category} />
